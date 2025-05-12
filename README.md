@@ -25,6 +25,9 @@ La aplicación se llama **CarFleet**.
 
 ![Logo de la Aplicación](https://github.com/25-25-DM/GRUPO-01/blob/main/Logo%20CarFleet.png?raw=true)
 
+### Opción dos
+
+![Logo de la Aplicación](https://echoes.solutions/wp-content/uploads/2022/08/CarFleet.webp)
 
 ## Tecnologías Utilizadas
 
