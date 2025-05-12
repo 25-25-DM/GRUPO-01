@@ -12,7 +12,7 @@ Este proyecto ha sido realizado como parte de la tarea correspondiente a la unid
 
 Los integrantes del grupo son:
 
-1. **--** - [Rol, por ejemplo: Desarrollador Backend]
+1. **Joel Joshua Luna Grijalva** - [Rol, por ejemplo: Desarrollador Backend]
 2. **Kevin Fernando Pozo Maldonado** - [Rol, por ejemplo: Diseñador UX/UI]
 3. **Freddy Xavier Tapia Rea** - [Rol, por ejemplo: Desarrollador Frontend]
 4. **--** - [Rol, por ejemplo: Líder de Proyecto]
