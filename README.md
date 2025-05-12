@@ -6,8 +6,6 @@
 
 ¡Bienvenidos al repositorio de nuestro proyecto! Somos **Grupo Uno** y hemos desarrollado una aplicación móvil que permite gestionar vehículos. El objetivo principal es crear una plataforma que permita a los usuarios autenticarse, registrar nuevos usuarios y gestionar vehículos (insertar, editar y eliminar).
 
-Este proyecto ha sido realizado como parte de la tarea correspondiente a la unidad [número de unidad]. Todos los miembros del grupo han participado activamente en el desarrollo de la aplicación.
-
 ## Miembros del Grupo
 
 Los integrantes del grupo son:
@@ -32,7 +30,7 @@ Este proyecto ha sido desarrollado utilizando las siguientes tecnologías y herr
 
 - **Lenguaje**: Dart (para el desarrollo con Flutter)
 - **Framework**: Flutter
-- **Base de Datos**: [Firebase, SQLite, o la base de datos que estés utilizando]
+- **Base de Datos**: [Firebase, SQLite]
 - **Herramientas de Desarrollo**: Android Studio
 - **Control de Versiones**: GitHub
 - **Diseño**: Figma (para el diseño del logo)
@@ -50,7 +48,7 @@ Para instalar y ejecutar este proyecto en tu máquina local, sigue los siguiente
 2. Entra en el directorio del proyecto:
 
     ```bash
-    cd [nombre-del-repositorio]
+    cd GRUPO-01
     ```
 
 3. Instala las dependencias de Flutter (asegúrate de tener **Flutter** instalado en tu máquina):
