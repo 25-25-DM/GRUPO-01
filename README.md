@@ -71,70 +71,27 @@ Para instalar y ejecutar este proyecto en tu máquina local, sigue los siguiente
 
     O, si prefieres usar Android Studio, puedes hacer clic en el botón de "Run" directamente desde el IDE.
 
-## Estructura del Proyecto
 
 ## 📁 Estructura del Proyecto
 
-El código está organizado siguiendo el patrón de diseño **MVC (Modelo - Vista - Controlador)**. La estructura de directorios es la siguiente:
+El proyecto está organizado en varias carpetas clave que siguen el patrón de diseño MVC (Modelo - Vista - Controlador). La estructura básica es la siguiente:
 
-- **`/lib/`**
-  - **`/models/`**: Clases que representan los datos (Usuario, Vehículo, etc.)
-    - `user_model.dart`
-    - `vehicle_model.dart`
+/lib/: Contiene todo el código fuente de la aplicación.
 
-  - **`/views/`**: Pantallas de la aplicación y widgets de interfaz
-    - **`/auth/`**: Pantallas de Login y Registro
-      - `login_view.dart`
-      - `register_view.dart`
-    - **`/home/`**: Pantalla de Inicio con listado de vehículos
-      - `home_view.dart`
-    - **`/vehicles/`**: Gestión de vehículos (CRUD)
-      - `add_vehicle_view.dart`
-      - `edit_vehicle_view.dart`
-      - `vehicle_details_view.dart`
-    - **`/widgets/`**: Componentes reutilizables
-      - `vehicle_card.dart`
+/models/: Clases que representan los datos de la aplicación, como Usuario y Vehículo.
 
-  - **`/controllers/`**: Lógica para manejar el flujo de datos y navegación
-    - `auth_controller.dart`
-    - `vehicle_controller.dart`
-    - `session_controller.dart`
+/views/: Archivos que gestionan la interfaz de usuario (pantallas y widgets), como la pantalla de Login, Registro, Inicio, y las pantallas de Gestión de Vehículos.
 
-  - **`/services/`**: Servicios para autenticación y persistencia de datos
-    - `auth_service.dart`
-    - `vehicle_service.dart`
-    - `database.dart`
+/controllers/: Lógica para controlar la interacción entre la vista y los modelos, incluyendo controladores para autenticación y gestión de vehículos.
 
-  - **`/utils/`**: Funciones auxiliares, constantes, validaciones, etc.
-    - `validators.dart`
-    - `constants.dart`
+/services/: Servicios relacionados con la persistencia de datos, como la conexión a la base de datos y autenticación de usuarios.
 
-  - **`main.dart`**: Punto de entrada de la aplicación
+/utils/: Funciones auxiliares y constantes que se utilizan en todo el proyecto.
 
-- **`/assets/`**: Recursos como imágenes, íconos, etc.
-  - `logo.png`
-  - **`/vehicles/`**: Imágenes de vehículos
-    - `car1.jpg`
-    - `car2.jpg`
-    - `car3.jpg`
+main.dart: El archivo principal que inicia la aplicación.
 
-- **`/apk/`**: Archivo APK generado para entrega
-  - `app-release.apk`
+/assets/: Recursos estáticos como imágenes, íconos y el logo de la aplicación.
 
-- **`/documentacion.pdf`**: Documento del modelo de navegación (con capturas y explicación)
+/apk/: Carpeta que contiene el archivo APK compilado de la aplicación.
 
-
-# Recursos como imágenes, íconos y logo
-/assets                  # Recursos como imágenes, íconos y logo
-├── logo.png
-└── vehicles/
-    ├── car1.jpg
-    ├── car2.jpg
-    └── car3.jpg
-# Archivo compilado para entrega
-/apk                    # Archivo compilado para entrega
-└── app-release.apk
-# Modelo de navegación documentado con capturas y explicación
-/documentacion.pdf      # Modelo de navegación documentado con capturas y explicación
-
-
+/documentacion.pdf: Documento que explica el modelo de navegación de la aplicación, incluyendo capturas de pantalla y diagramas.
