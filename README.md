@@ -75,4 +75,51 @@ Para instalar y ejecutar este proyecto en tu máquina local, sigue los siguiente
 
 El código está organizado siguiendo el patrón de diseño **MVC** (Modelo-Vista-Controlador). La estructura de directorios es la siguiente:
 
-...
+/lib
+├── /models/              # Clases que representan los datos (Usuario, Vehículo, etc.)
+│   ├── user_model.dart
+│   └── vehicle_model.dart
+│
+├── /views/               # Pantallas de la aplicación y widgets de interfaz
+│   ├── /auth/            # Login y Registro
+│   │   ├── login_view.dart
+│   │   └── register_view.dart
+│   ├── /home/            # Pantalla de Inicio con listado de vehículos
+│   │   └── home_view.dart
+│   ├── /vehicles/        # Gestión de vehículos (CRUD)
+│   │   ├── add_vehicle_view.dart
+│   │   ├── edit_vehicle_view.dart
+│   │   └── vehicle_details_view.dart
+│   └── /widgets/         # Componentes reutilizables
+│       └── vehicle_card.dart
+│
+├── /controllers/         # Lógica para manejar el flujo de datos y navegación
+│   ├── auth_controller.dart
+│   ├── vehicle_controller.dart
+│   └── session_controller.dart
+│
+├── /services/            # Servicios para autenticación y persistencia de datos
+│   ├── auth_service.dart
+│   ├── vehicle_service.dart
+│   └── database.dart
+│
+├── /utils/               # Funciones auxiliares, constantes, validaciones, etc.
+│   ├── validators.dart
+│   └── constants.dart
+│
+├── main.dart             # Punto de entrada de la aplicación
+
+# Recursos como imágenes, íconos y logo
+/assets                  # Recursos como imágenes, íconos y logo
+├── logo.png
+└── vehicles/
+    ├── car1.jpg
+    ├── car2.jpg
+    └── car3.jpg
+# Archivo compilado para entrega
+/apk                    # Archivo compilado para entrega
+└── app-release.apk
+# Modelo de navegación documentado con capturas y explicación
+/documentacion.pdf      # Modelo de navegación documentado con capturas y explicación
+
+
