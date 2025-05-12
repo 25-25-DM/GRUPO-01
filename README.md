@@ -10,11 +10,12 @@
 
 Los integrantes del grupo son:
 
-1. **Joel Joshua Luna Grijalva** - [Rol, por ejemplo: Desarrollador Backend]
-2. **Kevin Fernando Pozo Maldonado** - [Rol, por ejemplo: Diseñador UX/UI]
-3. **Freddy Xavier Tapia Rea** - [Rol, por ejemplo: Desarrollador Frontend]
-4. **--** - [Rol, por ejemplo: Líder de Proyecto]
-5. **--** - [Rol, por ejemplo: Tester/QA]
+1. **Joel Joshua Luna Grijalva** – Desarrollador Backend  
+2. **Jordy Pedro Chamba Carrion** – Diseñador UX/UI  
+3. **Freddy Xavier Tapia Rea** – Desarrollador Frontend  
+4. **Kevin Fernando Pozo Maldonado** – Líder de Proyecto  
+5. **Bryan Eduardo Loya Cadena** – Tester / QA  
+6. **Rensso Nicolay Parra Vasquez** – Documentador y Soporte Técnico  
 
 ## Nombre de la Aplicación
 
