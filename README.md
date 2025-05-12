@@ -73,41 +73,56 @@ Para instalar y ejecutar este proyecto en tu máquina local, sigue los siguiente
 
 ## Estructura del Proyecto
 
-El código está organizado siguiendo el patrón de diseño **MVC** (Modelo-Vista-Controlador). La estructura de directorios es la siguiente:
+## 📁 Estructura del Proyecto
 
-/lib
-├── /models/              # Clases que representan los datos (Usuario, Vehículo, etc.)
-│   ├── user_model.dart
-│   └── vehicle_model.dart
-│
-├── /views/               # Pantallas de la aplicación y widgets de interfaz
-│   ├── /auth/            # Login y Registro
-│   │   ├── login_view.dart
-│   │   └── register_view.dart
-│   ├── /home/            # Pantalla de Inicio con listado de vehículos
-│   │   └── home_view.dart
-│   ├── /vehicles/        # Gestión de vehículos (CRUD)
-│   │   ├── add_vehicle_view.dart
-│   │   ├── edit_vehicle_view.dart
-│   │   └── vehicle_details_view.dart
-│   └── /widgets/         # Componentes reutilizables
-│       └── vehicle_card.dart
-│
-├── /controllers/         # Lógica para manejar el flujo de datos y navegación
-│   ├── auth_controller.dart
-│   ├── vehicle_controller.dart
-│   └── session_controller.dart
-│
-├── /services/            # Servicios para autenticación y persistencia de datos
-│   ├── auth_service.dart
-│   ├── vehicle_service.dart
-│   └── database.dart
-│
-├── /utils/               # Funciones auxiliares, constantes, validaciones, etc.
-│   ├── validators.dart
-│   └── constants.dart
-│
-├── main.dart             # Punto de entrada de la aplicación
+El código está organizado siguiendo el patrón de diseño **MVC (Modelo - Vista - Controlador)**. La estructura de directorios es la siguiente:
+
+- **`/lib/`**
+  - **`/models/`**: Clases que representan los datos (Usuario, Vehículo, etc.)
+    - `user_model.dart`
+    - `vehicle_model.dart`
+
+  - **`/views/`**: Pantallas de la aplicación y widgets de interfaz
+    - **`/auth/`**: Pantallas de Login y Registro
+      - `login_view.dart`
+      - `register_view.dart`
+    - **`/home/`**: Pantalla de Inicio con listado de vehículos
+      - `home_view.dart`
+    - **`/vehicles/`**: Gestión de vehículos (CRUD)
+      - `add_vehicle_view.dart`
+      - `edit_vehicle_view.dart`
+      - `vehicle_details_view.dart`
+    - **`/widgets/`**: Componentes reutilizables
+      - `vehicle_card.dart`
+
+  - **`/controllers/`**: Lógica para manejar el flujo de datos y navegación
+    - `auth_controller.dart`
+    - `vehicle_controller.dart`
+    - `session_controller.dart`
+
+  - **`/services/`**: Servicios para autenticación y persistencia de datos
+    - `auth_service.dart`
+    - `vehicle_service.dart`
+    - `database.dart`
+
+  - **`/utils/`**: Funciones auxiliares, constantes, validaciones, etc.
+    - `validators.dart`
+    - `constants.dart`
+
+  - **`main.dart`**: Punto de entrada de la aplicación
+
+- **`/assets/`**: Recursos como imágenes, íconos, etc.
+  - `logo.png`
+  - **`/vehicles/`**: Imágenes de vehículos
+    - `car1.jpg`
+    - `car2.jpg`
+    - `car3.jpg`
+
+- **`/apk/`**: Archivo APK generado para entrega
+  - `app-release.apk`
+
+- **`/documentacion.pdf`**: Documento del modelo de navegación (con capturas y explicación)
+
 
 # Recursos como imágenes, íconos y logo
 /assets                  # Recursos como imágenes, íconos y logo
