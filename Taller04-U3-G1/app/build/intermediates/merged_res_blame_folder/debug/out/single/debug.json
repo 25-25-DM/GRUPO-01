@@ -1,0 +1,126 @@
+[
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-xxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/drawable_info_background.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/drawable/info_background.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/drawable_ic_delete.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/drawable/ic_delete.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/layout_activity_login.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/drawable_button_background.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/drawable/button_background.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-hdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-mdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-mdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-xxxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/layout_activity_main_real.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/layout/activity_main_real.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/layout_fragment_pdf_renderer_basic.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/layout/fragment_pdf_renderer_basic.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/drawable_edit_text_background.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/drawable/edit_text_background.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/drawable_viodrive_logo.png.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/drawable/viodrive_logo.png"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/drawable_ic_pick_file_black_24dp.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/drawable/ic_pick_file_black_24dp.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/drawable_ic_info.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/drawable/ic_info.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/layout_activity_main.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/menu_main.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/menu/main.xml"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-xhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.example.android.actionopendocument.app-merged_res-31:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.example.android.actionopendocument.app-main-33:/mipmap-anydpi-v26/ic_launcher.xml"
+    }
+]

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright 2017 The Android Open Source Project
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<resources>
+
+    <string name="app_name">VioDrive Document Viewer</string>
+    <string name="app_name_with_index">aodViewer (%1$d/%2$d)</string>
+
+    <string name="open_file">Open…</string>
+    <string name="info">Info</string>
+
+    <string name="open_file_button">Open File</string>
+
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="intro_message">
+        This sample demonstrates how to use PdfRenderer to display PDF documents on the screen.
+    </string>
+
+    <string name="open_call_to_action">Click "open" to view the contents of a PDF.</string>
+
+    <string name="delete">Delete</string>
+
+    <string name="app_logo">Logo de la aplicación</string>
+    <string name="enter_username">Ingrese su nombre de usuario</string>
+    <string name="continue_button">Continuar</string>
+    <string name="welcome_message">Bienvenido, %1$s</string>
+    <string name="user_info">Usuario actual: %1$s</string>
+    <string name="last_login">Último ingreso: %1$s</string>
+    <string name="back_button">Regresar</string>
+    <string name="login_welcome">Bienvenido a VioDrive</string>
+    <string name="previous_user">Usuario anterior</string>
+    <string name="new_user">Ingresar nuevo usuario</string>
+    <string name="continue_as_previous">Continuar con usuario anterior</string>
+    <string name="or_divider">─────── o ───────</string>
+    <string name="logout">Inicio</string>
+    <string name="previous_logins">Últimos ingresos</string>
+    <string name="recent_user_number">Usuario #%d</string>
+    <string name="clear_history">Limpiar historial</string>
+    <string name="history_cleared">Historial limpiado correctamente</string>
+    <string name="no_previous_user">No hay usuario anterior. Por favor, ingrese un nuevo usuario.</string>
+    <string name="enter_username_error">Por favor, ingrese un nombre de usuario</string>
+</resources>
