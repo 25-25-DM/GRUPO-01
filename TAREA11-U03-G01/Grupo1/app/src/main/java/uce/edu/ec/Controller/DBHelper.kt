@@ -96,7 +96,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "usuarios.db", null
     }
 
     // La función ahora requiere el usuarioId para ser segura
-    fun actualizarVehiculo(vehiculo: Vehiculo): Boolean {
+    fun actualizarVehiculo(vehiculo: Vehiculo, usuarioId: Int): Boolean {
         val db = writableDatabase
         val values = ContentValues().apply {
             put("marca", vehiculo.marca)
@@ -107,7 +107,14 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "usuarios.db", null
             put("activo", if (vehiculo.activo) 1 else 0)
             put("imagenRes", vehiculo.imagenRes)
         }
-        val updated = db.update("vehiculos", values, "placa=?", arrayOf(vehiculo.placa))
+        // ✅ SEGURIDAD: La cláusula WHERE ahora comprueba la placa Y el usuario_id.
+        // Solo se actualizará si ambos coinciden, evitando que un usuario edite vehículos de otro.
+        val updated = db.update(
+            "vehiculos",
+            values,
+            "placa = ? AND usuario_id = ?",
+            arrayOf(vehiculo.placa, usuarioId.toString())
+        )
         return updated > 0
     }
 

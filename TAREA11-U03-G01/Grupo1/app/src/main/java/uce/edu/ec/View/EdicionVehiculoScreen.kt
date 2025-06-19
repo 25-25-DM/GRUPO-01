@@ -196,8 +196,8 @@ fun EdicionVehiculoScreen(navController: NavController, vehiculoEditar: Vehiculo
                         imagenRes = vehiculoEditar.imagenRes // La imagen no cambia
                     )
 
-                    // ✅ CORRECCIÓN 2: Pasa el `usuarioId` a la función de actualizar para una operación segura.
-                    val exito = dbHelper.actualizarVehiculo(vehiculoActualizado)
+                    // ✅ SEGURIDAD: Pasa el `usuarioId` a la función de actualizar para validar propiedad.
+                    val exito = dbHelper.actualizarVehiculo(vehiculoActualizado, usuarioId)
 
                     if (exito) {
                         Toast.makeText(context, "Vehículo actualizado correctamente", Toast.LENGTH_SHORT).show()
