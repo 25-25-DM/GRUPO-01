@@ -5,21 +5,23 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import uce.edu.ec.Models.Vehiculo
-import java.security.MessageDigest
+import uce.edu.ec.R
 
-class DBHelper(context: Context) : SQLiteOpenHelper(context, "usuarios.db", null, 3) {
+// VERSIÓN DE LA BD INCREMENTADA A 4 para aplicar los cambios en la estructura de la tabla.
+class DBHelper(context: Context) : SQLiteOpenHelper(context, "app_cache.db", null, 4) {
 
     override fun onCreate(db: SQLiteDatabase?) {
+        // Tabla de usuarios local para mapear nombre de usuario (String) a un ID local (Int).
         db?.execSQL(
             """
             CREATE TABLE usuarios(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                usuario TEXT,
-                contrasenia TEXT
+                usuario TEXT UNIQUE NOT NULL
             )
         """.trimIndent()
         )
-        // Crear tabla vehiculos
+
+        // Tabla de vehículos local, usando 'usuario_id' y con la nueva columna 'sincronizado'.
         db?.execSQL(
             """
             CREATE TABLE vehiculos(
@@ -31,55 +33,58 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "usuarios.db", null
                 costoPorDia REAL,
                 activo INTEGER,
                 imagenRes INTEGER,
-                usuario_id INTEGER,  -- Nueva columna para la relación
-                FOREIGN KEY(usuario_id) REFERENCES usuarios(id) -- Definición de la relación
-)
+                usuario_id INTEGER, 
+                sincronizado INTEGER DEFAULT 0, -- 0 para no, 1 para sí
+                FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
+            )
         """.trimIndent()
         )
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        db?.execSQL("DROP TABLE IF EXISTS usuarios")
+        // Método simple de actualización: borrar todo y recrear.
         db?.execSQL("DROP TABLE IF EXISTS vehiculos")
+        db?.execSQL("DROP TABLE IF EXISTS usuarios")
         onCreate(db)
     }
 
-    // Función para convertir la contraseña en hash SHA-256
-    private fun hashPassword(password: String): String {
-        val md = MessageDigest.getInstance("SHA-256")
-        val bytes = md.digest(password.toByteArray())
-        return bytes.joinToString("") { "%02x".format(it) }
-    }
+    // --- FUNCIONES DE UTILIDAD PARA LA GESTIÓN LOCAL ---
 
-    fun registrarUsuario(usuario: String, contrasenia: String): Boolean {
+    /**
+     * Obtiene el ID numérico de un usuario. Si no existe localmente, lo crea y devuelve el nuevo ID.
+     * Esta función es el "traductor" entre el mundo de DynamoDB (nombres) y SQLite (IDs).
+     */
+    fun obtenerOInsertarUsuarioLocal(usuario: String): Int {
         val db = writableDatabase
-        val hashedPassword = hashPassword(contrasenia)  // Aquí hasheamos la contraseña
-        val values = ContentValues().apply {
-            put("usuario", usuario)
-            put("contrasenia", hashedPassword)
-        }
-        return db.insert("usuarios", null, values) != -1L
-    }
+        val cursor = db.rawQuery("SELECT id FROM usuarios WHERE usuario = ?", arrayOf(usuario))
 
-    fun verificarUsuario(usuario: String, contrasenia: String): Int? { // Devuelve Int? (un entero que puede ser nulo)
-        val db = readableDatabase
-        val hashedPassword = hashPassword(contrasenia)
-        val cursor = db.rawQuery(
-            "SELECT id FROM usuarios WHERE usuario=? AND contrasenia=?", // Pide solo el ID
-            arrayOf(usuario, hashedPassword)
-        )
-        val userId: Int? = if (cursor.moveToFirst()) {
-            cursor.getInt(cursor.getColumnIndexOrThrow("id"))
-        } else {
-            null // Si no lo encuentra, devuelve nulo
+        if (cursor.moveToFirst()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+            cursor.close()
+            return id
         }
         cursor.close()
-        return userId
+
+        val values = ContentValues().apply { put("usuario", usuario) }
+        return db.insert("usuarios", null, values).toInt()
     }
-// Funciones para vehículos:
 
-    fun insertarVehiculo(vehiculo: Vehiculo, usuarioId: Int): Boolean {
+    fun eliminarTodosLosVehiculosDelUsuario(usuarioId: Int) {
+        val db = writableDatabase
+        db.delete("vehiculos", "usuario_id = ?", arrayOf(usuarioId.toString()))
+    }
 
+    fun marcarVehiculoComoSincronizado(placa: String, estado: Boolean) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put("sincronizado", if (estado) 1 else 0)
+        }
+        db.update("vehiculos", values, "placa = ?", arrayOf(placa))
+    }
+
+    // --- FUNCIONES CRUD PARA VEHÍCULOS (LOCAL) ---
+
+    fun insertarVehiculo(vehiculo: Vehiculo, usuarioId: Int, sincronizado: Boolean) {
         val db = writableDatabase
         val values = ContentValues().apply {
             put("placa", vehiculo.placa)
@@ -91,12 +96,12 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "usuarios.db", null
             put("activo", if (vehiculo.activo) 1 else 0)
             put("imagenRes", vehiculo.imagenRes)
             put("usuario_id", usuarioId)
+            put("sincronizado", if (sincronizado) 1 else 0)
         }
-        return db.insert("vehiculos", null, values) != -1L
+        db.insertWithOnConflict("vehiculos", null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
-    // La función ahora requiere el usuarioId para ser segura
-    fun actualizarVehiculo(vehiculo: Vehiculo, usuarioId: Int): Boolean {
+    fun actualizarVehiculo(vehiculo: Vehiculo, usuarioId: Int, sincronizado: Boolean): Boolean {
         val db = writableDatabase
         val values = ContentValues().apply {
             put("marca", vehiculo.marca)
@@ -106,58 +111,22 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "usuarios.db", null
             put("costoPorDia", vehiculo.costoPorDia)
             put("activo", if (vehiculo.activo) 1 else 0)
             put("imagenRes", vehiculo.imagenRes)
+            put("sincronizado", if (sincronizado) 1 else 0)
         }
-        // ✅ SEGURIDAD: La cláusula WHERE ahora comprueba la placa Y el usuario_id.
-        // Solo se actualizará si ambos coinciden, evitando que un usuario edite vehículos de otro.
-        val updated = db.update(
-            "vehiculos",
-            values,
-            "placa = ? AND usuario_id = ?",
-            arrayOf(vehiculo.placa, usuarioId.toString())
-        )
-        return updated > 0
+        val rowsAffected = db.update("vehiculos", values, "placa = ? AND usuario_id = ?", arrayOf(vehiculo.placa, usuarioId.toString()))
+        return rowsAffected > 0
     }
 
-    fun eliminarVehiculo(placa: String, usuarioId: Int): Boolean {
+    fun eliminarVehiculo(placa: String, usuarioId: Int) {
         val db = writableDatabase
-        // 2. La condición WHERE ahora comprueba ambos campos.
-        // Solo se borrará la fila si la placa COINCIDE Y el usuario_id COINCIDE.
-        val deleted = db.delete("vehiculos", "placa=? AND usuario_id=?", arrayOf(placa, usuarioId.toString()))
-        return deleted > 0
-    }
-
-    fun obtenerVehiculoPorPlaca(placa: String, usuarioId: Int): Vehiculo? {
-        val db = readableDatabase
-        // La consulta busca un vehículo que coincida con la PLACA y el USUARIO_ID
-        val cursor = db.rawQuery(
-            "SELECT * FROM vehiculos WHERE placa = ? AND usuario_id = ?",
-            arrayOf(placa, usuarioId.toString())
-        )
-
-        var vehiculo: Vehiculo? = null
-        if (cursor.moveToFirst()) {
-            vehiculo = Vehiculo(
-                placa = cursor.getString(cursor.getColumnIndexOrThrow("placa")),
-                marca = cursor.getString(cursor.getColumnIndexOrThrow("marca")),
-                modelo = cursor.getString(cursor.getColumnIndexOrThrow("modelo")),
-                anio = cursor.getInt(cursor.getColumnIndexOrThrow("anio")),
-                color = cursor.getString(cursor.getColumnIndexOrThrow("color")),
-                costoPorDia = cursor.getDouble(cursor.getColumnIndexOrThrow("costoPorDia")),
-                activo = cursor.getInt(cursor.getColumnIndexOrThrow("activo")) == 1,
-                imagenRes = cursor.getInt(cursor.getColumnIndexOrThrow("imagenRes"))
-            )
-        }
-        cursor.close()
-        return vehiculo
+        db.delete("vehiculos", "placa = ? AND usuario_id = ?", arrayOf(placa, usuarioId.toString()))
     }
 
     fun obtenerVehiculos(usuarioId: Int): List<Vehiculo> {
         val db = readableDatabase
         val vehiculos = mutableListOf<Vehiculo>()
-        val cursor = db.rawQuery(
-            "SELECT * FROM vehiculos WHERE usuario_id = ?",
-            arrayOf(usuarioId.toString())
-        )
+        val cursor = db.rawQuery("SELECT * FROM vehiculos WHERE usuario_id = ?", arrayOf(usuarioId.toString()))
+
         if (cursor.moveToFirst()) {
             do {
                 val vehiculo = Vehiculo(
@@ -175,5 +144,25 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "usuarios.db", null
         }
         cursor.close()
         return vehiculos
+    }
+
+    fun obtenerVehiculoPorPlaca(placa: String, usuarioId: Int): Vehiculo? {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM vehiculos WHERE placa = ? AND usuario_id = ?", arrayOf(placa, usuarioId.toString()))
+        var vehiculo: Vehiculo? = null
+        if (cursor.moveToFirst()) {
+            vehiculo = Vehiculo(
+                placa = cursor.getString(cursor.getColumnIndexOrThrow("placa")),
+                marca = cursor.getString(cursor.getColumnIndexOrThrow("marca")),
+                modelo = cursor.getString(cursor.getColumnIndexOrThrow("modelo")),
+                anio = cursor.getInt(cursor.getColumnIndexOrThrow("anio")),
+                color = cursor.getString(cursor.getColumnIndexOrThrow("color")),
+                costoPorDia = cursor.getDouble(cursor.getColumnIndexOrThrow("costoPorDia")),
+                activo = cursor.getInt(cursor.getColumnIndexOrThrow("activo")) == 1,
+                imagenRes = cursor.getInt(cursor.getColumnIndexOrThrow("imagenRes"))
+            )
+        }
+        cursor.close()
+        return vehiculo
     }
 }

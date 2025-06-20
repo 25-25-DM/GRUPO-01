@@ -14,12 +14,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import uce.edu.ec.Controller.DBHelper
+import uce.edu.ec.Controller.AppRepository
+import kotlinx.coroutines.launch
 
 @Composable
-fun EliminarVehiculoScreen(navController: NavController, dbHelper: DBHelper, usuarioId: Int) {
+fun EliminarVehiculoScreen(navController: NavController, repository: AppRepository, usuarioId: Int, usuarioNombre: String) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var placa by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
     Box(
@@ -51,7 +54,7 @@ fun EliminarVehiculoScreen(navController: NavController, dbHelper: DBHelper, usu
 
             OutlinedTextField(
                 value = placa,
-                onValueChange = { placa = it },
+                onValueChange = { placa = it.uppercase() },
                 label = { Text("Placa del vehículo a eliminar") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -60,29 +63,42 @@ fun EliminarVehiculoScreen(navController: NavController, dbHelper: DBHelper, usu
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
-                onClick = {
-                    if (placa.isNotBlank()) {
-                        val exito = dbHelper.eliminarVehiculo(placa,usuarioId)
-                        if (exito) {
-                            Toast.makeText(context, "Vehículo eliminado", Toast.LENGTH_SHORT).show()
-                            navController.popBackStack()
+            if (isLoading) {
+                CircularProgressIndicator(color = MaterialTheme.colors.primary)
+            } else {
+                Button(
+                    onClick = {
+                        if (placa.isNotBlank()) {
+                            isLoading = true
+                            scope.launch {
+                                try {
+                                    repository.deleteVehiculo(placa, usuarioId, usuarioNombre)
+                                    Toast.makeText(context, "Vehículo eliminado exitosamente", Toast.LENGTH_SHORT).show()
+                                    navController.popBackStack()
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Error al eliminar el vehículo: ${e.message}", Toast.LENGTH_LONG).show()
+                                } finally {
+                                    isLoading = false
+                                }
+                            }
                         } else {
-                            Toast.makeText(context, "No se encontró el vehículo", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Ingrese la placa", Toast.LENGTH_SHORT).show()
                         }
-                    } else {
-                        Toast.makeText(context, "Ingrese la placa", Toast.LENGTH_SHORT).show()
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Text(
-                    text = "Eliminar Vehículo",
-                    style = MaterialTheme.typography.button.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
+                ) {
+                    Text(
+                        text = "Eliminar Vehículo",
+                        style = MaterialTheme.typography.button.copy(
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            color = Color.White
+                        )
+                    )
+                }
             }
         }
     }

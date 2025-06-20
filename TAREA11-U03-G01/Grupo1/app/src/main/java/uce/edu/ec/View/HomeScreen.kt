@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -21,12 +22,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import uce.edu.ec.Models.Vehiculo
 import uce.edu.ec.R
-import uce.edu.ec.Controller.DBHelper
+import uce.edu.ec.Controller.AppRepository
+import kotlinx.coroutines.launch
 
 @Composable
-fun HomeScreen(navController: NavController, dbHelper: DBHelper, usuarioId: Int) {
+fun HomeScreen(navController: NavController, repository: AppRepository, usuarioId: Int) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var listaVehiculos by remember { mutableStateOf(emptyList<Vehiculo>()) }
     var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     // Generar vehículos por defecto con placas únicas por usuario
     val vehiculosPorDefecto = remember(usuarioId) {
@@ -37,32 +42,37 @@ fun HomeScreen(navController: NavController, dbHelper: DBHelper, usuarioId: Int)
         )
     }
 
-    // Usar remember para cargar los datos de forma segura
-    val vehiculos = remember(usuarioId) {
-        try {
-            val vehiculosEnDb = dbHelper.obtenerVehiculos(usuarioId)
-            Log.d("HomeScreen", "Vehículos en BD para usuario $usuarioId: ${vehiculosEnDb.size}")
+    // Función para cargar vehículos
+    fun cargarVehiculos() {
+        scope.launch {
+            try {
+                val vehiculosEnDb = repository.getVehiculos(usuarioId, "usuario$usuarioId")
+                Log.d("HomeScreen", "Vehículos en BD para usuario $usuarioId: ${vehiculosEnDb.size}")
 
-            if (vehiculosEnDb.isEmpty()) {
-                Log.d("HomeScreen", "La BD está vacía para el usuario $usuarioId, insertando datos por defecto.")
-                vehiculosPorDefecto.forEach { vehiculo ->
-                    val exito = dbHelper.insertarVehiculo(vehiculo, usuarioId)
-                    Log.d("HomeScreen", "Insertar vehiculo ${vehiculo.placa} para usuario $usuarioId: $exito")
+                if (vehiculosEnDb.isEmpty()) {
+                    Log.d("HomeScreen", "La BD está vacía para el usuario $usuarioId, insertando datos por defecto.")
+                    vehiculosPorDefecto.forEach { vehiculo ->
+                        repository.addVehiculo(vehiculo, usuarioId, "usuario$usuarioId")
+                        Log.d("HomeScreen", "Insertado vehículo ${vehiculo.placa}")
+                    }
+                    listaVehiculos = repository.getVehiculos(usuarioId, "usuario$usuarioId")
+                } else {
+                    listaVehiculos = vehiculosEnDb
                 }
-                dbHelper.obtenerVehiculos(usuarioId)
-            } else {
-                vehiculosEnDb
+                errorMessage = null
+            } catch (e: Exception) {
+                Log.e("HomeScreen", "Error al cargar vehículos: ${e.message}")
+                errorMessage = "Error al cargar los vehículos: ${e.message}"
+                listaVehiculos = emptyList()
+            } finally {
+                isLoading = false
             }
-        } catch (e: Exception) {
-            Log.e("HomeScreen", "Error al cargar vehículos: ${e.message}")
-            emptyList()
         }
     }
 
-    // Actualizar la lista cuando los vehículos cambien
-    LaunchedEffect(vehiculos) {
-        listaVehiculos = vehiculos
-        isLoading = false
+    // Cargar datos al inicio
+    LaunchedEffect(usuarioId) {
+        cargarVehiculos()
     }
 
     LazyColumn(
@@ -72,6 +82,30 @@ fun HomeScreen(navController: NavController, dbHelper: DBHelper, usuarioId: Int)
             .padding(16.dp)
     ) {
         item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Lista de Vehículos",
+                    style = MaterialTheme.typography.h5.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colors.primary
+                    )
+                )
+                
+                Button(
+                    onClick = { 
+                        isLoading = true
+                        cargarVehiculos()
+                    },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
+                ) {
+                    Text("Recargar", color = Color.White)
+                }
+            }
+            
             if (isLoading) {
                 Box(
                     modifier = Modifier
@@ -83,15 +117,16 @@ fun HomeScreen(navController: NavController, dbHelper: DBHelper, usuarioId: Int)
                         color = MaterialTheme.colors.primary
                     )
                 }
-            } else {
+            }
+            
+            errorMessage?.let {
                 Text(
-                    "Lista de Vehículos",
-                    style = MaterialTheme.typography.h5.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colors.primary
-                    )
+                    text = it,
+                    color = Color.Red,
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
+            
             Spacer(modifier = Modifier.height(16.dp))
         }
 
@@ -211,10 +246,19 @@ fun VehicleInfoRow(label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp),
+            .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(label, fontWeight = FontWeight.Medium, color = Color.Gray)
-        Text(value, fontWeight = FontWeight.SemiBold)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.body1.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colors.primary
+            )
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.body1
+        )
     }
 }

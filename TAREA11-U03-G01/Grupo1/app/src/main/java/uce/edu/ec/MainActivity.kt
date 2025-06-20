@@ -9,7 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import uce.edu.ec.Controller.DBHelper
+import uce.edu.ec.Controller.AppRepository
 import uce.edu.ec.Models.Vehiculo
 import uce.edu.ec.View.EdicionVehiculoScreen
 import uce.edu.ec.View.EliminarVehiculoScreen
@@ -22,57 +22,70 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Crear instancia de DBHelper una vez
-        val dbHelper = DBHelper(this)
+        // Crear instancias de las dependencias
+        val repository = AppRepository(this)
 
         setContent {
             val navController = rememberNavController()
             NavHost(navController = navController, startDestination = "login") {
-                composable("login") { LoginScreen(navController, dbHelper) }
-                composable("register") { RegisterScreen(navController, dbHelper) }
-                composable("home/{usuarioId}") { backStackEntry ->
-                    val usuarioId =
-                        backStackEntry.arguments?.getString("usuarioId")?.toIntOrNull() ?: 0
-                    HomeScreen(navController, dbHelper, usuarioId)
-                }
+                composable("login") { LoginScreen(navController, repository) }
+                composable("register") { RegisterScreen(navController, repository) }
+                
                 composable(
-                    route = "insertVehiculo/{usuarioId}",
-                    arguments = listOf(navArgument("usuarioId") {
-                        type = NavType.IntType
-                    })
+                    route = "home/{usuarioId}/{usuarioNombre}",
+                    arguments = listOf(
+                        navArgument("usuarioId") { type = NavType.IntType },
+                        navArgument("usuarioNombre") { type = NavType.StringType }
+                    )
                 ) { backStackEntry ->
                     val usuarioId = backStackEntry.arguments?.getInt("usuarioId") ?: 0
-                    InsertVehiculoScreen(navController, dbHelper, usuarioId)
+                    val usuarioNombre = backStackEntry.arguments?.getString("usuarioNombre") ?: ""
+                    HomeScreen(navController, repository, usuarioId)
                 }
 
                 composable(
-                    route = "editVehiculo/{placa}/{usuarioId}",
+                    route = "insertVehiculo/{usuarioId}/{usuarioNombre}",
+                    arguments = listOf(
+                        navArgument("usuarioId") { type = NavType.IntType },
+                        navArgument("usuarioNombre") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val usuarioId = backStackEntry.arguments?.getInt("usuarioId") ?: 0
+                    val usuarioNombre = backStackEntry.arguments?.getString("usuarioNombre") ?: ""
+                    InsertVehiculoScreen(navController, repository, usuarioId, usuarioNombre)
+                }
+
+                composable(
+                    route = "editVehiculo/{placa}/{usuarioId}/{usuarioNombre}",
                     arguments = listOf(
                         navArgument("placa") { type = NavType.StringType },
-                        navArgument("usuarioId") { type = NavType.IntType }
+                        navArgument("usuarioId") { type = NavType.IntType },
+                        navArgument("usuarioNombre") { type = NavType.StringType }
                     )
                 ) { backStackEntry ->
                     val placa = backStackEntry.arguments?.getString("placa") ?: ""
                     val usuarioId = backStackEntry.arguments?.getInt("usuarioId") ?: 0
+                    val usuarioNombre = backStackEntry.arguments?.getString("usuarioNombre") ?: ""
 
-                    val vehiculo: Vehiculo? = dbHelper.obtenerVehiculoPorPlaca(placa, usuarioId)
-
+                    val vehiculo = repository.obtenerVehiculoPorPlaca(placa, usuarioId)
                     if (vehiculo != null) {
-                        EdicionVehiculoScreen(navController, vehiculo, dbHelper, usuarioId)
+                        EdicionVehiculoScreen(navController, vehiculo, repository, usuarioId, usuarioNombre)
                     } else {
                         navController.popBackStack()
                     }
                 }
 
                 composable(
-                    route = "eliminarVehiculo/{usuarioId}",
-                    arguments = listOf(navArgument("usuarioId") {
-                        type = NavType.IntType
-                    })
+                    route = "eliminarVehiculo/{usuarioId}/{usuarioNombre}",
+                    arguments = listOf(
+                        navArgument("usuarioId") { type = NavType.IntType },
+                        navArgument("usuarioNombre") { type = NavType.StringType }
+                    )
                 ) { backStackEntry ->
                     val usuarioId = backStackEntry.arguments?.getInt("usuarioId") ?: 0
-                    EliminarVehiculoScreen(navController, dbHelper, usuarioId)
-                } 
+                    val usuarioNombre = backStackEntry.arguments?.getString("usuarioNombre") ?: ""
+                    EliminarVehiculoScreen(navController, repository, usuarioId, usuarioNombre)
+                }
             }
         }
     }

@@ -19,11 +19,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import uce.edu.ec.R
-import uce.edu.ec.Controller.DBHelper
+import uce.edu.ec.Controller.AppRepository
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(navController: NavController, dbHelper: DBHelper) {
+fun LoginScreen(navController: NavController, repository: AppRepository) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var usuario by remember { mutableStateOf("") }
     var contrasenia by remember { mutableStateOf("") }
@@ -81,7 +83,7 @@ fun LoginScreen(navController: NavController, dbHelper: DBHelper) {
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .background(Color.White.copy(alpha = 0.8f)) // Ajusta el alpha según qué tan oscuro quieras
+                .background(Color.White.copy(alpha = 0.8f))
         )
 
         // Contenido encima
@@ -163,16 +165,21 @@ fun LoginScreen(navController: NavController, dbHelper: DBHelper) {
             Button(
                 onClick = {
                     if (validarCredenciales(usuario, contrasenia)) {
-                        val userId = dbHelper.verificarUsuario(usuario, contrasenia) // Ahora devuelve Int?
-
-                        if (userId != null) { // Si el ID no es nulo, el login es correcto
-                            Toast.makeText(context, "Bienvenido $usuario", Toast.LENGTH_SHORT).show()
-                            // Navega a la ruta home CON el ID del usuario
-                            navController.navigate("home/$userId") {
-                                popUpTo("login") { inclusive = true }
+                        scope.launch {
+                            try {
+                                val resultado = repository.verificarUsuario(usuario, contrasenia)
+                                if (resultado != null) {
+                                    val (nombreUsuario, userId) = resultado
+                                    Toast.makeText(context, "Bienvenido $nombreUsuario", Toast.LENGTH_SHORT).show()
+                                    navController.navigate("home/$userId/$nombreUsuario") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                } else {
+                                    Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+                                }
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Error de conexión: ${e.message}", Toast.LENGTH_LONG).show()
                             }
-                        } else {
-                            Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
                         }
                     }
                 },

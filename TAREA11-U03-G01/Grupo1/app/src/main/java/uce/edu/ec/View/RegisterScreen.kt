@@ -17,14 +17,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import uce.edu.ec.Controller.DBHelper
+import uce.edu.ec.Controller.AppRepository
+import kotlinx.coroutines.launch
 
 @Composable
-fun RegisterScreen(navController: NavController, dbHelper: DBHelper) {
+fun RegisterScreen(navController: NavController, repository: AppRepository) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var usuario by remember { mutableStateOf("") }
     var contrasenia by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
     var errorUsuario by remember { mutableStateOf<String?>(null) }
     var errorContrasenia by remember { mutableStateOf<String?>(null) }
@@ -141,27 +144,48 @@ fun RegisterScreen(navController: NavController, dbHelper: DBHelper) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
-            onClick = {
-                if (validarCredenciales(usuario, contrasenia)) {
-                    val registrado = dbHelper.registrarUsuario(usuario, contrasenia)
-                    if (registrado) {
-                        Toast.makeText(context, "Usuario registrado exitosamente", Toast.LENGTH_SHORT).show()
-                        navController.navigate("login") {
-                            popUpTo("register") { inclusive = true }
+        if (isLoading) {
+            CircularProgressIndicator(color = morado)
+        } else {
+            Button(
+                onClick = {
+                    if (validarCredenciales(usuario, contrasenia)) {
+                        isLoading = true
+                        scope.launch {
+                            try {
+                                // Primero probamos la conexión
+                                val conexionExitosa = repository.probarConexion()
+                                if (!conexionExitosa) {
+                                    Toast.makeText(context, "Error: No hay conexión con DynamoDB. Verifica las credenciales de AWS.", Toast.LENGTH_LONG).show()
+                                    return@launch
+                                }
+
+                                // Si la conexión es exitosa, procedemos con el registro
+                                val registrado = repository.registrarUsuario(usuario, contrasenia)
+                                if (registrado) {
+                                    Toast.makeText(context, "Usuario registrado exitosamente", Toast.LENGTH_SHORT).show()
+                                    navController.navigate("login") {
+                                        popUpTo("register") { inclusive = true }
+                                    }
+                                } else {
+                                    Toast.makeText(context, "Error: el usuario ya existe", Toast.LENGTH_SHORT).show()
+                                }
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Error de conexión: ${e.message}", Toast.LENGTH_LONG).show()
+                            } finally {
+                                isLoading = false
+                            }
                         }
-                    } else {
-                        Toast.makeText(context, "Error: el usuario ya existe", Toast.LENGTH_SHORT).show()
                     }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor = morado)
-        ) {
-            Text("Registrarse", color = Color.White)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = morado)
+            ) {
+                Text("Registrarse", color = Color.White)
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))

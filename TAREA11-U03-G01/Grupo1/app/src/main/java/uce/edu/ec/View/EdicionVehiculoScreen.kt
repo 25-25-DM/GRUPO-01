@@ -19,12 +19,22 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import uce.edu.ec.Controller.DBHelper
 import uce.edu.ec.Models.Vehiculo
+import uce.edu.ec.Controller.AppRepository
 import java.util.Calendar
+import kotlinx.coroutines.launch
 
 // ✅ CORRECCIÓN 1: La función ahora acepta el `usuarioId` que viene desde la navegación.
 @Composable
-fun EdicionVehiculoScreen(navController: NavController, vehiculoEditar: Vehiculo, dbHelper: DBHelper, usuarioId: Int) {
+fun EdicionVehiculoScreen(
+    navController: NavController,
+    vehiculoEditar: Vehiculo,
+    repository: AppRepository,
+    usuarioId: Int,
+    usuarioNombre: String
+) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(false) }
 
     var marca by remember { mutableStateOf(vehiculoEditar.marca) }
     var modelo by remember { mutableStateOf(vehiculoEditar.modelo) }
@@ -154,64 +164,75 @@ fun EdicionVehiculoScreen(navController: NavController, vehiculoEditar: Vehiculo
         Spacer(modifier = Modifier.height(32.dp))
 
         // Botón para guardar los cambios
-        Button(
-            onClick = {
-                val regexLetrasEspacios = Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")
-                var esValido = true
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(50.dp),
+                color = MaterialTheme.colors.primary
+            )
+        } else {
+            Button(
+                onClick = {
+                    val regexLetrasEspacios = Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")
+                    var esValido = true
 
-                // Realiza todas las validaciones
-                if (marca.isBlank() || !regexLetrasEspacios.matches(marca)) {
-                    marcaError = "Marca inválida. Solo letras y espacios."
-                    esValido = false
-                }
-                if (modelo.isBlank() || !regexLetrasEspacios.matches(modelo)) {
-                    modeloError = "Modelo inválido. Solo letras y espacios."
-                    esValido = false
-                }
-                val anioInt = anio.toIntOrNull()
-                if (anioInt == null || anioInt < 1900 || anioInt > Calendar.getInstance().get(Calendar.YEAR) + 1) {
-                    anioError = "Año inválido."
-                    esValido = false
-                }
-                if (color.isBlank() || !regexLetrasEspacios.matches(color)) {
-                    colorError = "Color inválido. Solo letras y espacios."
-                    esValido = false
-                }
-                val costoDouble = costoPorDia.toDoubleOrNull()
-                if (costoDouble == null || costoDouble <= 0) {
-                    costoError = "Costo inválido. Debe ser un número positivo."
-                    esValido = false
-                }
-
-                // Si todo es válido, procede a actualizar
-                if (esValido) {
-                    val vehiculoActualizado = Vehiculo(
-                        placa = vehiculoEditar.placa, // La placa no cambia
-                        marca = marca,
-                        modelo = modelo,
-                        anio = anio.toInt(),
-                        color = color,
-                        costoPorDia = costoPorDia.toDouble(),
-                        activo = activo,
-                        imagenRes = vehiculoEditar.imagenRes // La imagen no cambia
-                    )
-
-                    // ✅ SEGURIDAD: Pasa el `usuarioId` a la función de actualizar para validar propiedad.
-                    val exito = dbHelper.actualizarVehiculo(vehiculoActualizado, usuarioId)
-
-                    if (exito) {
-                        Toast.makeText(context, "Vehículo actualizado correctamente", Toast.LENGTH_SHORT).show()
-                        navController.popBackStack() // Regresa a la pantalla anterior (HomeScreen)
-                    } else {
-                        Toast.makeText(context, "Error al actualizar el vehículo", Toast.LENGTH_SHORT).show()
+                    // Realiza todas las validaciones
+                    if (marca.isBlank() || !regexLetrasEspacios.matches(marca)) {
+                        marcaError = "Marca inválida. Solo letras y espacios."
+                        esValido = false
                     }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-        ) {
-            Text(text = "Guardar Cambios")
+                    if (modelo.isBlank() || !regexLetrasEspacios.matches(modelo)) {
+                        modeloError = "Modelo inválido. Solo letras y espacios."
+                        esValido = false
+                    }
+                    val anioInt = anio.toIntOrNull()
+                    if (anioInt == null || anioInt < 1900 || anioInt > Calendar.getInstance().get(Calendar.YEAR) + 1) {
+                        anioError = "Año inválido."
+                        esValido = false
+                    }
+                    if (color.isBlank() || !regexLetrasEspacios.matches(color)) {
+                        colorError = "Color inválido. Solo letras y espacios."
+                        esValido = false
+                    }
+                    val costoDouble = costoPorDia.toDoubleOrNull()
+                    if (costoDouble == null || costoDouble <= 0) {
+                        costoError = "Costo inválido. Debe ser un número positivo."
+                        esValido = false
+                    }
+
+                    // Si todo es válido, procede a actualizar
+                    if (esValido) {
+                        val vehiculoActualizado = Vehiculo(
+                            placa = vehiculoEditar.placa,
+                            marca = marca,
+                            modelo = modelo,
+                            anio = anio.toInt(),
+                            color = color,
+                            costoPorDia = costoPorDia.toDouble(),
+                            activo = activo,
+                            imagenRes = vehiculoEditar.imagenRes
+                        )
+
+                        isLoading = true
+                        scope.launch {
+                            try {
+                                repository.updateVehiculo(vehiculoActualizado, usuarioId, usuarioNombre)
+                                Toast.makeText(context, "Vehículo actualizado correctamente", Toast.LENGTH_SHORT).show()
+                                navController.popBackStack()
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Error al actualizar: ${e.message}", Toast.LENGTH_LONG).show()
+                            } finally {
+                                isLoading = false
+                            }
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                Text(text = "Guardar Cambios")
+            }
         }
     }
 }
+

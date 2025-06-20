@@ -17,14 +17,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import uce.edu.ec.Controller.DBHelper
+import uce.edu.ec.Controller.AppRepository
 import uce.edu.ec.Models.Vehiculo
 import uce.edu.ec.R
+import kotlinx.coroutines.launch
 
 @Composable
-fun InsertVehiculoScreen(navController: NavController, dbHelper: DBHelper, usuarioId: Int) {
+fun InsertVehiculoScreen(navController: NavController, repository: AppRepository, usuarioId: Int, usuarioNombre: String) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(false) }
 
     var placa by remember { mutableStateOf("") }
     var marca by remember { mutableStateOf("") }
@@ -177,72 +180,80 @@ fun InsertVehiculoScreen(navController: NavController, dbHelper: DBHelper, usuar
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(
-            onClick = {
-                var valido = true
+        if (isLoading) {
+            CircularProgressIndicator(color = MaterialTheme.colors.primary)
+        } else {
+            Button(
+                onClick = {
+                    var valido = true
 
-                val regexPlaca = Regex("^[A-Z]{3}\\d{3}$")
-                if (!regexPlaca.matches(placa)) {
-                    placaError = "Placa inválida. Ej: ABC123"
-                    valido = false
-                }
-
-                val regexLetras = Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")
-                if (marca.isBlank() || !regexLetras.matches(marca)) {
-                    marcaError = "Marca inválida. Solo letras y espacios."
-                    valido = false
-                }
-
-                if (modelo.isBlank() || !regexLetras.matches(modelo)) {
-                    modeloError = "Modelo inválido. Solo letras y espacios."
-                    valido = false
-                }
-
-                val anioInt = anio.toIntOrNull()
-                if (anioInt == null || anioInt < 1900 || anioInt > 2025) {
-                    anioError = "Año inválido. Entre 1900 y 2025."
-                    valido = false
-                }
-
-                if (color.isBlank() || !regexLetras.matches(color)) {
-                    colorError = "Color inválido. Solo letras."
-                    valido = false
-                }
-
-                val costo = costoPorDia.toDoubleOrNull()
-                if (costo == null || costo <= 0) {
-                    costoError = "Costo inválido. Solo números positivos."
-                    valido = false
-                }
-
-                if (valido) {
-                    val vehiculo = Vehiculo(
-                        placa = placa,
-                        marca = marca,
-                        modelo = modelo,
-                        anio = anioInt!!,
-                        color = color,
-                        costoPorDia = costo!!,
-                        activo = activo,
-                        imagenRes = R.drawable.a4
-                    )
-
-                    // ✅ Aquí pasamos el usuarioId
-                    val exito = dbHelper.insertarVehiculo(vehiculo, usuarioId)
-
-                    if (exito) {
-                        Toast.makeText(context, "Vehículo insertado", Toast.LENGTH_SHORT).show()
-                        navController.popBackStack()
-                    } else {
-                        Toast.makeText(context, "Error al insertar vehículo", Toast.LENGTH_SHORT).show()
+                    val regexPlaca = Regex("^[A-Z]{3}\\d{3}$")
+                    if (!regexPlaca.matches(placa)) {
+                        placaError = "Placa inválida. Ej: ABC123"
+                        valido = false
                     }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-        ) {
-            Text("Guardar Vehículo", fontWeight = FontWeight.Bold)
+
+                    val regexLetras = Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")
+                    if (marca.isBlank() || !regexLetras.matches(marca)) {
+                        marcaError = "Marca inválida. Solo letras y espacios."
+                        valido = false
+                    }
+
+                    if (modelo.isBlank() || !regexLetras.matches(modelo)) {
+                        modeloError = "Modelo inválido. Solo letras y espacios."
+                        valido = false
+                    }
+
+                    val anioInt = anio.toIntOrNull()
+                    if (anioInt == null || anioInt < 1900 || anioInt > 2025) {
+                        anioError = "Año inválido. Entre 1900 y 2025."
+                        valido = false
+                    }
+
+                    if (color.isBlank() || !regexLetras.matches(color)) {
+                        colorError = "Color inválido. Solo letras y espacios."
+                        valido = false
+                    }
+
+                    val costo = costoPorDia.toDoubleOrNull()
+                    if (costo == null || costo <= 0) {
+                        costoError = "Costo inválido. Debe ser mayor a 0."
+                        valido = false
+                    }
+
+                    if (valido) {
+                        val vehiculo = Vehiculo(
+                            placa = placa,
+                            marca = marca,
+                            modelo = modelo,
+                            anio = anioInt!!,
+                            color = color,
+                            costoPorDia = costo!!,
+                            activo = activo,
+                            imagenRes = R.drawable.a4
+                        )
+
+                        isLoading = true
+                        scope.launch {
+                            try {
+                                repository.addVehiculo(vehiculo, usuarioId, usuarioNombre)
+                                Toast.makeText(context, "Vehículo agregado exitosamente", Toast.LENGTH_SHORT).show()
+                                navController.popBackStack()
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Error al agregar el vehículo: ${e.message}", Toast.LENGTH_LONG).show()
+                            } finally {
+                                isLoading = false
+                            }
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
+            ) {
+                Text("Guardar", color = Color.White)
+            }
         }
     }
 }
