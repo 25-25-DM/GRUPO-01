@@ -69,9 +69,42 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "app_cache.db", nul
         return db.insert("usuarios", null, values).toInt()
     }
 
+    fun obtenerTodosLosUsuariosLocales(): List<Pair<Int, String>> {
+        val db = readableDatabase
+        val usuarios = mutableListOf<Pair<Int, String>>()
+        val cursor = db.rawQuery("SELECT id, usuario FROM usuarios", null)
+        if (cursor.moveToFirst()) {
+            do {
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+                val nombre = cursor.getString(cursor.getColumnIndexOrThrow("usuario"))
+                usuarios.add(Pair(id, nombre))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return usuarios
+    }
+
+    fun eliminarUsuarioPorNombre(usuario: String) {
+        val db = writableDatabase
+        db.delete("usuarios", "usuario = ?", arrayOf(usuario))
+    }
+
     fun eliminarTodosLosVehiculosDelUsuario(usuarioId: Int) {
         val db = writableDatabase
         db.delete("vehiculos", "usuario_id = ?", arrayOf(usuarioId.toString()))
+    }
+
+    fun obtenerPlacasDeVehiculosDelUsuario(usuarioId: Int): List<String> {
+        val db = readableDatabase
+        val placas = mutableListOf<String>()
+        val cursor = db.rawQuery("SELECT placa FROM vehiculos WHERE usuario_id = ?", arrayOf(usuarioId.toString()))
+        if (cursor.moveToFirst()) {
+            do {
+                placas.add(cursor.getString(cursor.getColumnIndexOrThrow("placa")))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return placas
     }
 
     fun marcarVehiculoComoSincronizado(placa: String, estado: Boolean) {

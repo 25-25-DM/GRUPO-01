@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                 ) { backStackEntry ->
                     val usuarioId = backStackEntry.arguments?.getInt("usuarioId") ?: 0
                     val usuarioNombre = backStackEntry.arguments?.getString("usuarioNombre") ?: ""
-                    HomeScreen(navController, repository, usuarioId)
+                    HomeScreen(navController, repository, usuarioId, usuarioNombre)
                 }
 
                 composable(

@@ -16,7 +16,7 @@ object AWSClient {
         if (ddbClient == null) {
             try {
                 // Introduce aquí las TRES claves que obtuviste del laboratorio
-              
+               
                 if (accessKey.isBlank() || secretKey.isBlank() || sessionToken.isBlank()) {
                     throw IllegalStateException("Las credenciales de AWS no pueden estar vacías")
                 }

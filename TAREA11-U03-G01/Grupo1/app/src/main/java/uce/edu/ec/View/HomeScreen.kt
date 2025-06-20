@@ -26,12 +26,15 @@ import uce.edu.ec.Controller.AppRepository
 import kotlinx.coroutines.launch
 
 @Composable
-fun HomeScreen(navController: NavController, repository: AppRepository, usuarioId: Int) {
+fun HomeScreen(navController: NavController, repository: AppRepository, usuarioId: Int, usuarioNombre: String) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var listaVehiculos by remember { mutableStateOf(emptyList<Vehiculo>()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    // Usar el usuarioNombre que viene como parámetro
+    // val usuarioNombre = "usuario$usuarioId"
 
     // Generar vehículos por defecto con placas únicas por usuario
     val vehiculosPorDefecto = remember(usuarioId) {
@@ -46,16 +49,16 @@ fun HomeScreen(navController: NavController, repository: AppRepository, usuarioI
     fun cargarVehiculos() {
         scope.launch {
             try {
-                val vehiculosEnDb = repository.getVehiculos(usuarioId, "usuario$usuarioId")
+                val vehiculosEnDb = repository.getVehiculos(usuarioId, usuarioNombre)
                 Log.d("HomeScreen", "Vehículos en BD para usuario $usuarioId: ${vehiculosEnDb.size}")
 
                 if (vehiculosEnDb.isEmpty()) {
                     Log.d("HomeScreen", "La BD está vacía para el usuario $usuarioId, insertando datos por defecto.")
                     vehiculosPorDefecto.forEach { vehiculo ->
-                        repository.addVehiculo(vehiculo, usuarioId, "usuario$usuarioId")
+                        repository.addVehiculo(vehiculo, usuarioId, usuarioNombre)
                         Log.d("HomeScreen", "Insertado vehículo ${vehiculo.placa}")
                     }
-                    listaVehiculos = repository.getVehiculos(usuarioId, "usuario$usuarioId")
+                    listaVehiculos = repository.getVehiculos(usuarioId, usuarioNombre)
                 } else {
                     listaVehiculos = vehiculosEnDb
                 }
@@ -167,7 +170,7 @@ fun HomeScreen(navController: NavController, repository: AppRepository, usuarioI
 
                     Button(
                         onClick = {
-                            navController.navigate("editVehiculo/${vehiculo.placa}/$usuarioId")
+                            navController.navigate("editVehiculo/${vehiculo.placa}/$usuarioId/$usuarioNombre")
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -185,7 +188,7 @@ fun HomeScreen(navController: NavController, repository: AppRepository, usuarioI
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { navController.navigate("insertVehiculo/$usuarioId") },
+                onClick = { navController.navigate("insertVehiculo/$usuarioId/$usuarioNombre") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -203,7 +206,7 @@ fun HomeScreen(navController: NavController, repository: AppRepository, usuarioI
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { navController.navigate("eliminarVehiculo/$usuarioId") },
+                onClick = { navController.navigate("eliminarVehiculo/$usuarioId/$usuarioNombre") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),

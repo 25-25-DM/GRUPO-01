@@ -86,6 +86,41 @@ class AppRepository(context: Context) {
         return localDb.obtenerVehiculos(usuarioId)
     }
 
+    suspend fun sincronizarCompleto() = withContext(Dispatchers.IO) {
+        sincronizarUsuariosConLaNube()
+        // Aquí podrías agregar una sincronización de todos los vehículos si fuera necesario
+    }
+
+    private suspend fun sincronizarUsuariosConLaNube() = withContext(Dispatchers.IO) {
+        try {
+            Log.d("AppRepository", "Iniciando sincronización de usuarios...")
+            val scanRequest = ScanRequest().withTableName("Usuarios")
+            val scanResult = remoteDb.scan(scanRequest)
+            val usuariosEnNube = scanResult.items.mapNotNull { it["usuario"]?.s }.toSet()
+
+            val usuariosLocales = localDb.obtenerTodosLosUsuariosLocales()
+
+            // Eliminar usuarios locales que no están en la nube
+            val usuariosAEliminar = usuariosLocales.filter { it.second !in usuariosEnNube }
+            if (usuariosAEliminar.isNotEmpty()) {
+                Log.d("AppRepository", "Usuarios a eliminar localmente: ${usuariosAEliminar.map { it.second }}")
+                usuariosAEliminar.forEach {
+                    // Primero eliminar los vehículos asociados a este usuario
+                    localDb.eliminarTodosLosVehiculosDelUsuario(it.first)
+                    // Luego eliminar al usuario
+                    localDb.eliminarUsuarioPorNombre(it.second)
+                }
+            }
+
+            // Opcional: Insertar usuarios de la nube que no estén localmente
+            // (actualmente `obtenerOInsertarUsuarioLocal` ya maneja esto al iniciar sesión)
+
+            Log.d("AppRepository", "Sincronización de usuarios completada.")
+        } catch (e: Exception) {
+            Log.e("AppRepository", "Fallo la sincronización de usuarios.", e)
+        }
+    }
+
     private suspend fun sincronizarConLaNube(usuarioId: Int, usuarioNombre: String) = withContext(Dispatchers.IO) {
         try {
             val queryRequest = QueryRequest()
@@ -107,8 +142,20 @@ class AppRepository(context: Context) {
                 )
             }
 
-            localDb.eliminarTodosLosVehiculosDelUsuario(usuarioId)
-            vehiculosDesdeNube.forEach { localDb.insertarVehiculo(it, usuarioId, true) }
+            val placasEnNube = vehiculosDesdeNube.map { it.placa }.toSet()
+            val placasLocales = localDb.obtenerPlacasDeVehiculosDelUsuario(usuarioId).toSet()
+
+            // 1. Eliminar vehículos locales que ya no están en la nube
+            val placasAEliminar = placasLocales - placasEnNube
+            placasAEliminar.forEach { placa ->
+                localDb.eliminarVehiculo(placa, usuarioId)
+            }
+
+            // 2. Insertar o actualizar vehículos desde la nube
+            vehiculosDesdeNube.forEach { vehiculo ->
+                localDb.insertarVehiculo(vehiculo, usuarioId, true) // insertOrReplace
+            }
+
         } catch (e: Exception) {
             Log.e("AppRepository", "Fallo la sincronización, trabajando con datos locales.", e)
         }
@@ -141,8 +188,17 @@ class AppRepository(context: Context) {
         localDb.actualizarVehiculo(vehiculo, usuarioId, sincronizado = false)
         withContext(Dispatchers.IO) {
             try {
-                // (La lógica para actualizar es la misma que para insertar, PutItem sobrescribe)
-                val item = mapOf(/*...mismos campos que en addVehiculo...*/"usuario" to AttributeValue(usuarioNombre))
+                val item = mapOf(
+                    "usuario" to AttributeValue(usuarioNombre),
+                    "placa" to AttributeValue(vehiculo.placa),
+                    "marca" to AttributeValue(vehiculo.marca),
+                    "modelo" to AttributeValue(vehiculo.modelo),
+                    "anio" to AttributeValue().withN(vehiculo.anio.toString()),
+                    "color" to AttributeValue(vehiculo.color),
+                    "costoPorDia" to AttributeValue().withN(vehiculo.costoPorDia.toString()),
+                    "activo" to AttributeValue().withBOOL(vehiculo.activo),
+                    "imagenRes" to AttributeValue().withN(vehiculo.imagenRes.toString())
+                )
                 remoteDb.putItem(PutItemRequest("Vehiculos", item))
                 localDb.marcarVehiculoComoSincronizado(vehiculo.placa, true)
             } catch (e: Exception) {
