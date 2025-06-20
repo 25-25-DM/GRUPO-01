@@ -15,8 +15,10 @@ object AWSClient {
     fun getDynamoDBClient(): AmazonDynamoDBClient {
         if (ddbClient == null) {
             try {
-                // Introduce aquí las TRES claves que obtuviste del laboratorio
-               
+                // Introduce aquí las TRES claves del laboratorio
+
+
+
                 if (accessKey.isBlank() || secretKey.isBlank() || sessionToken.isBlank()) {
                     throw IllegalStateException("Las credenciales de AWS no pueden estar vacías")
                 }
